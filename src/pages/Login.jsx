@@ -1,18 +1,28 @@
 import { useState } from 'react';
-import { LogIn, Lock, Mail, Settings, Shield } from 'lucide-react';
+import { LogIn, Lock, Mail, Settings, Shield, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login = ({ onLogin }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      onLogin({ id: 1, name: 'Administrador', role: 'admin', email: 'admin@hub.com' });
+    
+    // Lista de usuários de teste
+    const users = [
+      { id: '1', email: 'admin@hub.com', password: 'admin', name: 'Administrador Hub', role: 'administrador' },
+      { id: '2', email: 'marcelobarudi71@gmail.com', password: '123456', name: 'Marcelo Barudi', role: 'administrador' }
+    ];
+
+    const user = users.find(u => (u.email === email || (email === 'admin' && u.email === 'admin@hub.com')) && u.password === password);
+
+    if (user) {
+      onLogin(user);
     } else {
-      setError('Usuário ou senha incorretos.');
+      setError('E-mail ou senha incorretos.');
+      setTimeout(() => setError(''), 3000);
     }
   };
 
@@ -32,16 +42,16 @@ const Login = ({ onLogin }) => {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase ml-1">Usuário</label>
+              <label className="text-xs font-bold text-slate-500 uppercase ml-1">E-mail</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                 <input 
                   type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Seu nome de usuário" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Seu e-mail" 
                   className="w-full pl-12 pr-4 py-4 bg-slate-50 border-transparent rounded-2xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none border hover:border-slate-200"
                 />
               </div>
