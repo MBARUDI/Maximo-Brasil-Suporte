@@ -15,7 +15,7 @@ const Dashboard = ({ searchQuery }) => {
           <p className="text-slate-500 font-medium">Bem-vindo de volta! Aqui está o resumo das atividades de suporte.</p>
         </div>
 
-        <StatusCards />
+        <StatusCards tickets={tickets} />
 
         <div className="mt-12">
           <div className="flex items-center justify-between mb-6">

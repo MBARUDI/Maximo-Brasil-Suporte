@@ -247,7 +247,18 @@ const Settings = ({ user, updateUser, systemSettings, updateSystemSettings, help
                     <Info size={18} /> Zona de Perigo
                   </h4>
                   <p className="text-red-600 text-sm mb-4">Esta ação não pode ser desfeita. Todos os chamados serão permanentemente removidos do banco de dados.</p>
-                  <button className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all">
+                  <button 
+                    onClick={() => {
+                      const confirm = window.prompt(`Para confirmar a exclusão de TODOS os chamados, digite o nome de usuário do administrador (${user.name}):`);
+                      if (confirm === user.name) {
+                        onClearAllTickets();
+                        alert('Todos os chamados foram excluídos.');
+                      } else if (confirm !== null) {
+                        alert('Confirmação incorreta.');
+                      }
+                    }}
+                    className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all"
+                  >
                     Excluir Todos os Chamados
                   </button>
                 </div>

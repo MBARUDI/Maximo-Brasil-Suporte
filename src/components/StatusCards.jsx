@@ -1,34 +1,30 @@
-import { MessageSquare, Clock, Wrench, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Clock, Wrench, CheckCircle2, ShieldCheck, Ticket } from 'lucide-react';
 
-const StatusCards = () => {
+const StatusCards = ({ tickets = [] }) => {
   const stats = [
     { 
       label: 'Chamados Abertos', 
-      value: '24', 
-      icon: MessageSquare, 
-      color: 'blue',
-      trend: '+12% desde ontem'
+      value: tickets.filter(t => t.status === 'Pendente').length, 
+      icon: Ticket, 
+      color: 'blue'
     },
     { 
       label: 'Em Atendimento', 
-      value: '12', 
-      icon: Clock, 
-      color: 'amber',
-      trend: 'Estável'
-    },
-    { 
-      label: 'Aguardando Peças', 
-      value: '08', 
+      value: tickets.filter(t => t.status === 'Em Progresso').length, 
       icon: Wrench, 
-      color: 'rose',
-      trend: '-5% esta semana'
+      color: 'amber'
     },
     { 
-      label: 'Concluídos Hoje', 
-      value: '16', 
+      label: 'Validando Solução', 
+      value: tickets.filter(t => t.status === 'Validando').length, 
       icon: CheckCircle2, 
-      color: 'emerald',
-      trend: 'Meta atingida'
+      color: 'purple'
+    },
+    { 
+      label: 'Concluídos', 
+      value: tickets.filter(t => t.status === 'Concluído').length, 
+      icon: ShieldCheck, 
+      color: 'emerald'
     },
   ];
 
@@ -37,6 +33,7 @@ const StatusCards = () => {
     amber: 'bg-amber-50 text-amber-600 border-amber-100',
     rose: 'bg-rose-50 text-rose-600 border-rose-100',
     emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    purple: 'bg-purple-50 text-purple-600 border-purple-100',
   };
 
   return (
@@ -47,16 +44,18 @@ const StatusCards = () => {
             <div className={`p-3 rounded-xl border ${colors[stat.color]}`}>
               <stat.icon size={24} />
             </div>
-            <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
-              {stat.trend}
-            </span>
           </div>
           <div>
             <h3 className="text-3xl font-bold text-slate-800">{stat.value}</h3>
             <p className="text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
           </div>
           <div className="mt-4 h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-            <div className={`h-full transition-all duration-1000 w-[70%] ${stat.color === 'blue' ? 'bg-blue-500' : stat.color === 'amber' ? 'bg-amber-500' : stat.color === 'rose' ? 'bg-rose-500' : 'bg-emerald-500'}`}></div>
+            <div className={`h-full transition-all duration-1000 w-[70%] ${
+              stat.color === 'blue' ? 'bg-blue-500' : 
+              stat.color === 'amber' ? 'bg-amber-500' : 
+              stat.color === 'purple' ? 'bg-purple-500' : 
+              'bg-emerald-500'
+            }`}></div>
           </div>
         </div>
       ))}
