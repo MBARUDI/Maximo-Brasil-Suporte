@@ -22,6 +22,7 @@ async function run() {
     await sql`
       INSERT INTO users (name, email, password, role, allowed_categories)
       VALUES 
+        ('Administrador Master', 'admin', 'admin', 'administrador', NULL),
         ('Técnico TI', 'ti@hub.com', '123456', 'técnico', 'Informática/TI'),
         ('Técnico Elétrica', 'eletrica@hub.com', '123456', 'técnico', 'Elétrica'),
         ('Técnico Predial', 'predial@hub.com', '123456', 'técnico', 'Predial/Civil'),
