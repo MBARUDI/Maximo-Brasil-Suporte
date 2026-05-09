@@ -211,7 +211,12 @@ app.put('/api/users/:id', async (req, res) => {
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`API Server rodando na porta ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`API Server rodando na porta ${PORT}`);
+  });
+}
+
+export default app;
