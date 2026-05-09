@@ -1,9 +1,49 @@
 import { useState } from 'react';
-import { User, Shield, Bell, Settings as SettingsIcon, Database, HelpCircle, Info } from 'lucide-react';
+import { User, Shield, Bell, Settings as SettingsIcon, Database, HelpCircle, Info, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const Settings = () => {
+const Settings = ({ user, updateUser, systemSettings, updateSystemSettings, helpInfo, updateHelpInfo }) => {
   const [activeTab, setActiveTab] = useState('profile');
+  const [localSystemSettings, setLocalSystemSettings] = useState(systemSettings);
+  const [localHelpInfo, setLocalHelpInfo] = useState(helpInfo);
+  const [localUser, setLocalUser] = useState(user);
+
+  const handleProfileSave = () => {
+    updateUser(localUser);
+    alert('Perfil atualizado com sucesso!');
+  };
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLocalUser({ ...localUser, avatar: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSystemSave = () => {
+    updateSystemSettings(localSystemSettings);
+    alert('Configurações do sistema atualizadas!');
+  };
+
+  const handleHelpSave = () => {
+    updateHelpInfo(localHelpInfo);
+    alert('Informações de ajuda atualizadas!');
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLocalSystemSettings({ ...localSystemSettings, logo: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const tabs = [
     { id: 'profile', label: 'Perfil', icon: User },
@@ -48,40 +88,50 @@ const Settings = () => {
               <div className="flex items-center gap-6 mb-8">
                 <div className="relative group">
                   <div className="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center border-4 border-white shadow-md overflow-hidden">
-                    <User size={40} className="text-slate-400" />
+                    {localUser.avatar ? (
+                      <img src={localUser.avatar} className="w-full h-full object-cover" />
+                    ) : (
+                      <User size={40} className="text-slate-400" />
+                    )}
                   </div>
-                  <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all scale-90 group-hover:scale-100">
+                  <input type="file" id="avatar-upload" className="hidden" onChange={handleAvatarUpload} accept="image/*" />
+                  <label htmlFor="avatar-upload" className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all scale-90 group-hover:scale-100 cursor-pointer">
                     <SettingsIcon size={14} />
-                  </button>
+                  </label>
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-800 text-lg">João Duarte</h4>
-                  <p className="text-slate-500 text-sm">Técnico Nível 2</p>
+                  <h4 className="font-bold text-slate-800 text-lg">{localUser.name}</h4>
+                  <p className="text-slate-500 text-sm">{user.role.toUpperCase()}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase ml-1">Nome Completo</label>
-                  <input type="text" defaultValue="João Duarte" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                  <input 
+                    type="text" 
+                    value={localUser.name} 
+                    onChange={(e) => setLocalUser({...localUser, name: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase ml-1">E-mail</label>
-                  <input type="email" defaultValue="joao.duarte@empresa.com" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Telefone</label>
-                  <input type="text" defaultValue="(11) 98888-7777" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase ml-1">Cargo</label>
-                  <input type="text" defaultValue="Técnico Nível 2" readOnly className="w-full px-4 py-3 bg-slate-50/50 border-transparent rounded-xl text-sm text-slate-400 outline-none" />
+                  <input 
+                    type="email" 
+                    value={localUser.email}
+                    onChange={(e) => setLocalUser({...localUser, email: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                  />
                 </div>
               </div>
 
               <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-                <button className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">
-                  Salvar Alterações
+                <button 
+                  onClick={handleProfileSave}
+                  className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95"
+                >
+                  Salvar Perfil
                 </button>
               </div>
             </motion.div>
@@ -154,14 +204,41 @@ const Settings = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <h3 className="text-xl font-bold text-slate-800 mb-6">Personalização do Sistema</h3>
               <div className="space-y-8">
+                <div className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-dashed border-slate-300 overflow-hidden">
+                    {localSystemSettings.logo ? (
+                      <img src={localSystemSettings.logo} className="w-full h-full object-cover" />
+                    ) : (
+                      <SettingsIcon className="text-slate-300" size={32} />
+                    )}
+                  </div>
+                  <div>
+                    <input type="file" id="logo-upload" className="hidden" onChange={handleLogoUpload} accept="image/*" />
+                    <label htmlFor="logo-upload" className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 cursor-pointer hover:bg-slate-50 transition-all">
+                      Alterar Logo
+                    </label>
+                    <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-wider">PNG ou JPG, máx 2MB</p>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase ml-1">Título do Site</label>
-                    <input type="text" defaultValue="SupportHub" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                    <input 
+                      type="text" 
+                      value={localSystemSettings.title} 
+                      onChange={(e) => setLocalSystemSettings({...localSystemSettings, title: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase ml-1">Subtítulo</label>
-                    <input type="text" defaultValue="Gestão Inteligente de Suporte" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                    <input 
+                      type="text" 
+                      value={localSystemSettings.subtitle} 
+                      onChange={(e) => setLocalSystemSettings({...localSystemSettings, subtitle: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                    />
                   </div>
                 </div>
 
@@ -172,6 +249,15 @@ const Settings = () => {
                   <p className="text-red-600 text-sm mb-4">Esta ação não pode ser desfeita. Todos os chamados serão permanentemente removidos do banco de dados.</p>
                   <button className="px-6 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all">
                     Excluir Todos os Chamados
+                  </button>
+                </div>
+
+                <div className="pt-6 border-t border-slate-100 flex justify-end">
+                  <button 
+                    onClick={handleSystemSave}
+                    className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
+                  >
+                    Salvar Sistema
                   </button>
                 </div>
               </div>
@@ -229,27 +315,51 @@ const Settings = () => {
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase ml-1">Texto de Ajuda (Máx 20 caracteres)</label>
-                  <input type="text" maxLength={20} className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" placeholder="Ex: Suporte 24h" />
+                  <input 
+                    type="text" 
+                    maxLength={20} 
+                    value={localHelpInfo.text}
+                    onChange={(e) => setLocalHelpInfo({...localHelpInfo, text: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase ml-1">E-mail de Suporte</label>
-                    <input type="email" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                    <input 
+                      type="email" 
+                      value={localHelpInfo.email}
+                      onChange={(e) => setLocalHelpInfo({...localHelpInfo, email: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase ml-1">Telefone de Suporte</label>
-                    <input type="text" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                    <input 
+                      type="text" 
+                      value={localHelpInfo.phone}
+                      onChange={(e) => setLocalHelpInfo({...localHelpInfo, phone: e.target.value})}
+                      className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase ml-1">Site de Documentação</label>
-                  <input type="url" className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" />
+                  <input 
+                    type="url" 
+                    value={localHelpInfo.site}
+                    onChange={(e) => setLocalHelpInfo({...localHelpInfo, site: e.target.value})}
+                    className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
+                  />
                 </div>
               </div>
 
               <div className="mt-10 pt-6 border-t border-slate-100 flex justify-end">
-                <button className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95">
-                  Atualizar Informações
+                <button 
+                  onClick={handleHelpSave}
+                  className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all"
+                >
+                  Atualizar Ajuda
                 </button>
               </div>
             </motion.div>

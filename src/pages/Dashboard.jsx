@@ -4,7 +4,7 @@ import TicketTable from '../components/TicketTable';
 import CategoryFilters from '../components/CategoryFilters';
 import { motion } from 'framer-motion';
 
-const Dashboard = () => {
+const Dashboard = ({ searchQuery }) => {
   const [activeCategory, setActiveCategory] = useState('all');
 
   return (
@@ -33,7 +33,7 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <TicketTable categoryFilter={activeCategory} />
+            <TicketTable categoryFilter={activeCategory} searchQuery={searchQuery} />
           </motion.div>
         </div>
       </main>

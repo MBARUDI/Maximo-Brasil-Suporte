@@ -1,57 +1,29 @@
 import { useState } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Trash2 } from 'lucide-react';
 
-const TicketTable = ({ categoryFilter }) => {
+const TicketTable = ({ categoryFilter, searchQuery = '', tickets = [], onUpdateStatus, onDelete, user }) => {
   const [statusFilter, setStatusFilter] = useState('all');
-
-  const tickets = [
-    { 
-      id: '#TK-2045', 
-      subject: 'Servidor de arquivos inacessível no setor financeiro', 
-      category: 'Informática/TI', 
-      priority: 'Crítica', 
-      status: 'Em Progresso',
-      catId: 'it'
-    },
-    { 
-      id: '#TK-2046', 
-      subject: 'Manutenção preventiva no gerador principal', 
-      category: 'Elétrica', 
-      priority: 'Alta', 
-      status: 'Pendente',
-      catId: 'electric'
-    },
-    { 
-      id: '#TK-2047', 
-      subject: 'Vazamento detectado na tubulação do 3º andar', 
-      category: 'Predial/Civil', 
-      priority: 'Média', 
-      status: 'Validando',
-      catId: 'civil'
-    },
-    { 
-      id: '#TK-2048', 
-      subject: 'Câmera do estacionamento sem sinal (CFTV)', 
-      category: 'Segurança', 
-      priority: 'Alta', 
-      status: 'Pendente',
-      catId: 'security'
-    },
-    { 
-      id: '#TK-2049', 
-      subject: 'Instalação de novos pontos de rede (WIFI 6)', 
-      category: 'Telecom', 
-      priority: 'Baixa', 
-      status: 'Em Progresso',
-      catId: 'telecom'
-    },
-  ];
 
   const filteredTickets = tickets.filter(t => {
     const matchCat = categoryFilter === 'all' || t.catId === categoryFilter;
     const matchStatus = statusFilter === 'all' || t.status === statusFilter;
-    return matchCat && matchStatus;
+    const matchSearch = !searchQuery || 
+      t.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.id.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchStatus && matchSearch;
   });
+
+  const handleStatusChange = (ticketId, newStatus) => {
+    if (onUpdateStatus) {
+      onUpdateStatus(ticketId, newStatus);
+    }
+  };
+
+  const handleDelete = (ticketId) => {
+    if (window.confirm('Tem certeza que deseja excluir este chamado?')) {
+      if (onDelete) onDelete(ticketId);
+    }
+  };
 
   const priorityStyles = {
     'Crítica': 'text-red-700 bg-red-100 border-red-200',
@@ -126,14 +98,29 @@ const TicketTable = ({ categoryFilter }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`badge ${statusStyles[ticket.status]}`}>
-                    {ticket.status}
-                  </span>
+                  <select 
+                    value={ticket.status}
+                    onChange={(e) => handleStatusChange(ticket.id, e.target.value)}
+                    className={`text-[10px] font-bold px-2 py-1 rounded-md outline-none transition-all cursor-pointer ${statusStyles[ticket.status]}`}
+                  >
+                    <option value="Pendente">Pendente</option>
+                    <option value="Em Progresso">Em Progresso</option>
+                    <option value="Validando">Validando</option>
+                    <option value="Concluído">Concluído</option>
+                  </select>
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
                   <button className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">
                     Detalhes
                   </button>
+                  {user?.role === 'administrador' && (
+                    <button 
+                      onClick={() => handleDelete(ticket.id)}
+                      className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

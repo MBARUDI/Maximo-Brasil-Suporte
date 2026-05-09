@@ -1,83 +1,120 @@
 import { useState } from 'react';
-import { Send, FileText, AlertTriangle, Layers } from 'lucide-react';
+import { Send, FileText, AlertTriangle, Layers, ArrowLeft, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const NewTicket = ({ onBack }) => {
+const NewTicket = ({ onBack, onSubmit }) => {
+  const [formData, setFormData] = useState({
+    subject: '',
+    category: 'Informática/TI',
+    catId: 'it',
+    priority: 'Média',
+    description: ''
+  });
+
+  const categories = [
+    { id: 'it', name: 'Informática/TI' },
+    { id: 'electric', name: 'Elétrica' },
+    { id: 'civil', name: 'Predial/Civil' },
+    { id: 'security', name: 'Segurança' },
+    { id: 'telecom', name: 'Telecom' },
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.subject || !formData.description) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    onSubmit(formData);
+  };
+
   return (
     <div className="p-8 flex-1 max-w-4xl mx-auto w-full">
-      <div className="mb-8">
-        <button onClick={onBack} className="text-sm font-bold text-blue-600 hover:text-blue-800 mb-4 transition-colors">
-          &larr; Voltar ao Painel
+      <div className="mb-8 flex items-center gap-4">
+        <button onClick={onBack} className="p-2 hover:bg-slate-100 rounded-xl transition-all">
+          <ArrowLeft size={24} className="text-slate-600" />
         </button>
-        <h2 className="text-3xl font-black text-navy-900 tracking-tight mb-2">Novo Chamado de Suporte</h2>
-        <p className="text-slate-500 font-medium">Preencha os detalhes abaixo para que nossa equipe possa ajudar você.</p>
+        <div>
+          <h2 className="text-3xl font-black text-navy-900 tracking-tight">Novo Chamado</h2>
+          <p className="text-slate-500 font-medium">Preencha os detalhes abaixo para solicitar suporte.</p>
+        </div>
       </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8"
       >
-        <form className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <div className="p-8 space-y-8">
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-2">
                 <FileText size={14} /> Assunto do Chamado
               </label>
               <input 
                 type="text" 
-                placeholder="Ex: Problema com o monitor" 
-                className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none border hover:border-slate-200"
+                required
+                value={formData.subject}
+                onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                placeholder="Ex: Impressora do RH não está funcionando" 
+                className="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl text-base focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none" 
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-2">
-                <Layers size={14} /> Categoria
-              </label>
-              <select className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none border hover:border-slate-200 appearance-none">
-                <option value="">Selecione uma categoria</option>
-                <option value="it">Informática/TI</option>
-                <option value="electric">Elétrica</option>
-                <option value="civil">Predial/Civil</option>
-                <option value="security">Segurança</option>
-                <option value="telecom">Telecom</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-2">
-              <AlertTriangle size={14} /> Prioridade
-            </label>
-            <div className="flex gap-4">
-              {['Baixa', 'Média', 'Alta', 'Crítica'].map((p) => (
-                <label key={p} className="flex-1 cursor-pointer group">
-                  <input type="radio" name="priority" value={p} className="sr-only" />
-                  <div className="text-center p-3 rounded-xl border border-slate-100 bg-slate-50 text-xs font-bold text-slate-500 group-hover:bg-white group-hover:border-blue-200 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">
-                    {p}
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-2">
+                  <Layers size={14} /> Categoria
                 </label>
-              ))}
+                <select 
+                  value={formData.catId}
+                  onChange={(e) => {
+                    const cat = categories.find(c => c.id === e.target.value);
+                    setFormData({...formData, catId: cat.id, category: cat.name});
+                  }}
+                  className="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl text-base focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                >
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase ml-1 flex items-center gap-2">
+                  <AlertTriangle size={14} /> Prioridade
+                </label>
+                <select 
+                  value={formData.priority}
+                  onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                  className="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl text-base focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none"
+                >
+                  <option value="Baixa">Baixa</option>
+                  <option value="Média">Média</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Crítica">Crítica</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrição Detalhada</label>
+              <textarea 
+                required
+                rows={5}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Descreva o problema com o máximo de detalhes possível..." 
+                className="w-full px-5 py-4 bg-slate-50 border-transparent rounded-2xl text-base focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none resize-none"
+              ></textarea>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Descrição Detalhada</label>
-            <textarea 
-              rows={5} 
-              placeholder="Descreva o problema com o máximo de detalhes possível..." 
-              className="w-full px-4 py-3 bg-slate-50 border-transparent rounded-xl text-sm focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all outline-none border hover:border-slate-200 resize-none"
-            ></textarea>
-          </div>
-
-          <div className="flex justify-end gap-4 pt-4">
-            <button type="button" onClick={onBack} className="px-6 py-3 font-bold text-slate-500 hover:text-slate-700 transition-colors">
-              Cancelar
+          <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+            <button type="button" onClick={onBack} className="text-sm font-bold text-slate-500 hover:text-slate-700">
+              Cancelar e Voltar
             </button>
-            <button className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 active:scale-95">
-              <Send size={18} />
-              Enviar Chamado
+            <button type="submit" className="px-10 py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-2">
+              <Plus size={20} />
+              Abrir Chamado
             </button>
           </div>
         </form>

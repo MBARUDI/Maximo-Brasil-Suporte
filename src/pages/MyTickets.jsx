@@ -3,7 +3,7 @@ import TicketTable from '../components/TicketTable';
 import { motion } from 'framer-motion';
 import { Search, Filter } from 'lucide-react';
 
-const MyTickets = () => {
+const MyTickets = ({ searchQuery }) => {
   return (
     <div className="p-8 flex-1">
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
