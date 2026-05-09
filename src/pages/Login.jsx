@@ -7,21 +7,27 @@ const Login = ({ onLogin }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
-    // Lista de usuários de teste
-    const users = [
-      { id: '1', email: 'admin@hub.com', password: 'admin', name: 'Administrador Hub', role: 'administrador' },
-      { id: '2', email: 'marcelobarudi71@gmail.com', password: '123456', name: 'Marcelo Barudi', role: 'administrador' }
-    ];
-
-    const user = users.find(u => (u.email === email || (email === 'admin' && u.email === 'admin@hub.com')) && u.password === password);
-
-    if (user) {
-      onLogin(user);
-    } else {
-      setError('E-mail ou senha incorretos.');
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        onLogin(data.user);
+      } else {
+        setError(data.message || 'E-mail ou senha incorretos.');
+        setTimeout(() => setError(''), 3000);
+      }
+    } catch (err) {
+      console.error('Erro na requisição:', err);
+      setError('Erro ao conectar ao servidor.');
       setTimeout(() => setError(''), 3000);
     }
   };
@@ -30,10 +36,10 @@ const Login = ({ onLogin }) => {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-600/20 rotate-3">
-            <Settings className="text-white animate-spin-slow" size={32} />
+          <div className="w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+            <img src="/imgMaximo.png" alt="Maximo Logo" className="w-full h-full object-contain drop-shadow-xl" />
           </div>
-          <h1 className="text-4xl font-black text-navy-900 tracking-tight mb-2">SupportHub</h1>
+          <h1 className="text-4xl font-black text-navy-900 tracking-tight mb-2">Máximo Brasil</h1>
           <p className="text-slate-500 font-medium italic">Acesse seu painel de atendimento</p>
         </div>
 

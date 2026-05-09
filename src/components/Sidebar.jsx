@@ -1,10 +1,12 @@
 import { LayoutDashboard, ClipboardList, BarChart3, Settings, ChevronRight, LogOut } from 'lucide-react';
 
-const Sidebar = ({ activePage, setActivePage, systemSettings }) => {
+const Sidebar = ({ activePage, setActivePage, systemSettings, user, onLogout }) => {
+  const isAdmin = user?.role?.toLowerCase() === 'administrador';
+
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Visão Geral' },
+    ...(isAdmin ? [{ id: 'dashboard', icon: LayoutDashboard, label: 'Visão Geral' }] : []),
     { id: 'tickets', icon: ClipboardList, label: 'Meus Chamados' },
-    { id: 'reports', icon: BarChart3, label: 'Relatórios' },
+    ...(isAdmin ? [{ id: 'reports', icon: BarChart3, label: 'Relatórios' }] : []),
     { id: 'settings', icon: Settings, label: 'Configurações' },
   ];
 
@@ -45,20 +47,29 @@ const Sidebar = ({ activePage, setActivePage, systemSettings }) => {
       </nav>
 
       <div className="p-4 border-t border-navy-800 space-y-4">
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-navy-950/50 border border-navy-800">
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-slate-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden border-2 border-blue-500/30">
-              JD
+        {user && (
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-navy-950/50 border border-navy-800">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full bg-slate-500 flex items-center justify-center text-sm font-bold text-white overflow-hidden border-2 border-blue-500/30">
+                {user.avatar ? (
+                  <img src={user.avatar} className="w-full h-full object-cover" />
+                ) : (
+                  user.name.substring(0, 2).toUpperCase()
+                )}
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-navy-900 rounded-full"></div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-navy-900 rounded-full"></div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-bold text-white truncate">{user.name}</p>
+              <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">{user.role}</p>
+            </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            <p className="text-sm font-bold text-white truncate">João Duarte</p>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Técnico Nível 2</p>
-          </div>
-        </div>
+        )}
 
-        <button className="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all text-sm font-semibold">
+        <button 
+          onClick={onLogout}
+          className="w-full flex items-center gap-3 p-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all text-sm font-semibold"
+        >
           <LogOut size={18} />
           Sair do Sistema
         </button>

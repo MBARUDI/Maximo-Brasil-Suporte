@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { AlertCircle, Trash2 } from 'lucide-react';
+import { AlertCircle, Trash2, X } from 'lucide-react';
 
 const TicketTable = ({ categoryFilter, searchQuery = '', tickets = [], onUpdateStatus, onDelete, user }) => {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedTicket, setSelectedTicket] = useState(null);
 
   const filteredTickets = tickets.filter(t => {
     const matchCat = categoryFilter === 'all' || t.catId === categoryFilter;
@@ -110,7 +111,10 @@ const TicketTable = ({ categoryFilter, searchQuery = '', tickets = [], onUpdateS
                   </select>
                 </td>
                 <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
-                  <button className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                  <button 
+                    onClick={() => setSelectedTicket(ticket)}
+                    className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                  >
                     Detalhes
                   </button>
                   {user?.role === 'administrador' && (
@@ -142,6 +146,81 @@ const TicketTable = ({ categoryFilter, searchQuery = '', tickets = [], onUpdateS
           Ver todos os chamados
         </button>
       </div>
+
+      {selectedTicket && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="text-xl font-bold text-navy-900 flex items-center gap-2">
+                Detalhes do Chamado <span className="text-sm font-bold px-2 py-1 bg-slate-200 text-slate-600 rounded-lg">{selectedTicket.id}</span>
+              </h3>
+              <button onClick={() => setSelectedTicket(null)} className="p-2 hover:bg-slate-200 rounded-full text-slate-500 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6 overflow-y-auto">
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Assunto</p>
+                <p className="text-lg font-bold text-slate-800">{selectedTicket.subject}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Status Atual</p>
+                  <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold ${statusStyles[selectedTicket.status]}`}>
+                    {selectedTicket.status}
+                  </span>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Prioridade</p>
+                  <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-bold border ${priorityStyles[selectedTicket.priority]}`}>
+                    {selectedTicket.priority}
+                  </span>
+                </div>
+                
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Categoria</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`w-2.5 h-2.5 rounded-full ${categoryColors[selectedTicket.category]}`}></span>
+                    <p className="font-bold text-slate-700 text-sm">{selectedTicket.category}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Descrição do Problema</p>
+                <div className="bg-slate-50 p-5 rounded-xl border border-slate-100 text-slate-700 text-sm whitespace-pre-wrap leading-relaxed">
+                  {selectedTicket.description || 'Nenhuma descrição detalhada fornecida para este chamado.'}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-between bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div>
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">Data de Abertura</p>
+                  <p className="text-sm font-bold text-blue-900">{new Date(selectedTicket.created_at).toLocaleString('pt-BR')}</p>
+                </div>
+                {selectedTicket.closed_at && (
+                  <div>
+                    <p className="text-[10px] font-bold text-emerald-500 uppercase">Data de Fechamento</p>
+                    <p className="text-sm font-bold text-emerald-900">{new Date(selectedTicket.closed_at).toLocaleString('pt-BR')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 flex justify-end bg-slate-50 mt-auto">
+              <button 
+                onClick={() => setSelectedTicket(null)} 
+                className="px-6 py-2.5 bg-navy-900 text-white font-bold rounded-xl shadow-lg shadow-navy-900/20 hover:bg-navy-800 transition-colors active:scale-95"
+              >
+                Fechar Detalhes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

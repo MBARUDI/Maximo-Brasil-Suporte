@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, Bell, User, Plus, HelpCircle, ChevronDown, Mail, LogOut, Settings } from 'lucide-react';
+import { Search, Bell, User, Plus, HelpCircle, ChevronDown, Mail, LogOut, Settings, Phone, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Header = ({ user, onLogout, onNewTicket, helpInfo, systemSettings, searchQuery, setSearchQuery }) => {
+const Header = ({ user, onLogout, onNewTicket, onOpenProfile, helpInfo, systemSettings, searchQuery, setSearchQuery }) => {
   const [showHelp, setShowHelp] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -63,9 +63,15 @@ const Header = ({ user, onLogout, onNewTicket, helpInfo, systemSettings, searchQ
                   )}
                   {helpInfo.phone && (
                     <div className="flex items-center gap-3 text-sm text-slate-600">
-                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Plus size={14} /></div>
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400"><Phone size={14} /></div>
                       <span>{helpInfo.phone}</span>
                     </div>
+                  )}
+                  {helpInfo.whatsapp && (
+                    <a href={helpInfo.whatsapp} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm text-green-600 hover:underline">
+                      <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center text-green-500"><MessageCircle size={14} /></div>
+                      <span className="font-semibold">Chamar no WhatsApp</span>
+                    </a>
                   )}
                   {helpInfo.site && (
                     <a href={helpInfo.site} target="_blank" rel="noreferrer" className="flex items-center gap-3 text-sm text-blue-600 hover:underline">
@@ -109,7 +115,13 @@ const Header = ({ user, onLogout, onNewTicket, helpInfo, systemSettings, searchQ
                   <p className="text-sm font-bold text-slate-800">{user.role.toUpperCase()}</p>
                 </div>
                 <div className="p-2">
-                  <button className="w-full flex items-center gap-3 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-xl transition-all">
+                  <button 
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      if (onOpenProfile) onOpenProfile();
+                    }}
+                    className="w-full flex items-center gap-3 p-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-xl transition-all"
+                  >
                     <User size={18} /> Perfil do Usuário
                   </button>
                   <button 

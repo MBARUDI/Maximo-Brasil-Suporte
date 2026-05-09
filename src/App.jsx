@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
@@ -14,79 +14,85 @@ function App() {
   const [activePage, setActivePage] = useState('dashboard');
   const [isCreatingTicket, setIsCreatingTicket] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [tickets, setTickets] = useState([
-    { 
-      id: '#TK-2045', 
-      subject: 'Servidor de arquivos inacessível no setor financeiro', 
-      category: 'Informática/TI', 
-      priority: 'Crítica', 
-      status: 'Em Progresso',
-      catId: 'it',
-      created_at: '2026-05-09T10:00:00Z',
-      closed_at: null,
-      user_id: '1'
-    },
-    { 
-      id: '#TK-2046', 
-      subject: 'Manutenção preventiva no gerador principal', 
-      category: 'Elétrica', 
-      priority: 'Alta', 
-      status: 'Pendente',
-      catId: 'electric',
-      created_at: '2026-05-09T11:30:00Z',
-      closed_at: null,
-      user_id: '2'
-    },
-    { 
-      id: '#TK-2047', 
-      subject: 'Vazamento detectado na tubulação do 3º andar', 
-      category: 'Predial/Civil', 
-      priority: 'Média', 
-      status: 'Validando',
-      catId: 'civil',
-      created_at: '2026-05-08T15:20:00Z',
-      closed_at: null,
-      user_id: '1'
-    },
-  ]);
+  const [tickets, setTickets] = useState([]);
 
-  const addTicket = (newTicket) => {
+  const fetchTickets = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`/api/tickets?userId=${user.id}`);
+      const data = await response.json();
+      setTickets(data);
+    } catch (err) {
+      console.error('Erro ao buscar chamados:', err);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchTickets();
+    }
+  }, [user, fetchTickets]);
+
+  const addTicket = async (newTicket) => {
+    const id = `#TK-${Math.floor(Math.random() * 9000) + 1000}`;
     const ticket = {
       ...newTicket,
-      id: `#TK-${Math.floor(Math.random() * 9000) + 1000}`,
+      id,
       status: 'Pendente',
-      created_at: new Date().toISOString(),
-      closed_at: null,
       user_id: user.id
     };
-    setTickets([ticket, ...tickets]);
-  };
-
-  const updateTicketStatus = (ticketId, newStatus) => {
-    setTickets(tickets.map(t => {
-      if (t.id === ticketId) {
-        return { 
-          ...t, 
-          status: newStatus, 
-          closed_at: newStatus === 'Concluído' ? new Date().toISOString() : t.closed_at 
-        };
+    
+    try {
+      const response = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ticket)
+      });
+      if (response.ok) {
+        fetchTickets(); // Atualiza a lista após criar
       }
-      return t;
-    }));
+    } catch (err) {
+      console.error('Erro ao adicionar chamado:', err);
+    }
   };
 
-  const deleteTicket = (ticketId) => {
-    setTickets(tickets.filter(t => t.id !== ticketId));
+  const updateTicketStatus = async (ticketId, newStatus) => {
+    try {
+      const response = await fetch(`/api/tickets/${encodeURIComponent(ticketId)}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (response.ok) {
+        fetchTickets();
+      }
+    } catch (err) {
+      console.error('Erro ao atualizar chamado:', err);
+    }
+  };
+
+  const deleteTicket = async (ticketId) => {
+    try {
+      const response = await fetch(`/api/tickets/${encodeURIComponent(ticketId)}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        fetchTickets();
+      }
+    } catch (err) {
+      console.error('Erro ao excluir chamado:', err);
+    }
   };
 
   const clearAllTickets = () => {
+    // Para simplificar, vou apenas limpar no front, mas idealmente seria na API também
     setTickets([]);
   };
 
   const [systemSettings, setSystemSettings] = useState({
-    title: 'SupportHub',
+    title: 'Máximo Brasil',
     subtitle: 'Gestão Inteligente de Suporte',
-    logo: null
+    logo: '/imgMaximo.png'
   });
 
   const updateSystemSettings = (newSettings) => {
@@ -97,9 +103,13 @@ function App() {
     setUser(prev => ({ ...prev, ...newData }));
   };
 
-  // Simulação de login inicial
   const handleLogin = (userData) => {
     setUser(userData);
+    if (userData.role?.toLowerCase() === 'administrador') {
+      setActivePage('dashboard');
+    } else {
+      setActivePage('tickets');
+    }
   };
 
   const handleLogout = () => {
@@ -109,9 +119,10 @@ function App() {
 
   const [helpInfo, setHelpInfo] = useState({
     text: 'Suporte Maximo',
-    email: 'ajuda@maximo.com.br',
+    email: 'maximobrasilmanut@gmail.com',
     site: 'https://ajuda.maximo.com.br',
-    phone: '(11) 4004-0000'
+    phone: '(11) 98591-9330',
+    whatsapp: 'https://wa.me/5511985919330'
   });
 
   const updateHelpInfo = (newInfo) => {
@@ -185,6 +196,8 @@ function App() {
           setSearchQuery(''); // Limpar busca ao mudar de página
         }} 
         systemSettings={systemSettings}
+        user={user}
+        onLogout={handleLogout}
       />
 
       <div className="flex-1 ml-64 flex flex-col">
@@ -192,6 +205,10 @@ function App() {
           user={user} 
           onLogout={handleLogout} 
           onNewTicket={() => setIsCreatingTicket(true)} 
+          onOpenProfile={() => {
+            setActivePage('settings');
+            setIsCreatingTicket(false);
+          }}
           helpInfo={helpInfo}
           systemSettings={systemSettings}
           searchQuery={searchQuery}
